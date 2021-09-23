@@ -1,0 +1,6 @@
+$out_root/
+{
+  include libtinycbor/
+}
+
+export $out_root/libtinycbor/$import.target

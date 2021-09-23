@@ -1,0 +1,53 @@
+intf_libs = # Interface dependencies.
+impl_libs = # Implementation dependencies.
+#import xxxx_libs += libhello%lib{hello}
+
+lib{tinycbor}: {h c}{** -version} h{version} $impl_libs $intf_libs
+
+# Include the generated version header into the distribution (so that we don't
+# pick up an installed one) and don't remove it when cleaning in src (so that
+# clean results in a state identical to distributed).
+#
+h{version}: in{version} $src_root/manifest
+{
+  dist  = true
+  clean = ($src_root != $out_root)
+}
+
+h{export}@./: c.importable = false
+
+# Build options.
+#
+c.poptions =+ "-I$out_root" "-I$src_root"
+
+{hbmia obja}{*}: c.poptions += -DLIBTINYCBOR_STATIC_BUILD
+{hbmis objs}{*}: c.poptions += -DLIBTINYCBOR_SHARED_BUILD
+
+# Export options.
+#
+lib{tinycbor}:
+{
+  c.export.poptions = "-I$out_root" "-I$src_root"
+  c.export.libs = $intf_libs
+}
+
+liba{tinycbor}: c.export.poptions += -DLIBTINYCBOR_STATIC
+libs{tinycbor}: c.export.poptions += -DLIBTINYCBOR_SHARED
+
+# For pre-releases use the complete version to make sure they cannot be used
+# in place of another pre-release or the final version. See the version module
+# for details on the version.* variable values.
+#
+if $version.pre_release
+  lib{tinycbor}: bin.lib.version = @"-$version.project_id"
+else
+  lib{tinycbor}: bin.lib.version = @"-$version.major.$version.minor"
+
+# Install into the libtinycbor/ subdirectory of, say, /usr/include/
+# recreating subdirectories.
+#
+h{*}:
+{
+  install         = include/libtinycbor/
+  install.subdirs = true
+}

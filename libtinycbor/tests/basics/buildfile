@@ -1,0 +1,3 @@
+import libs = libtinycbor%lib{tinycbor}
+
+exe{driver}: {h c}{**} $libs testscript{**}

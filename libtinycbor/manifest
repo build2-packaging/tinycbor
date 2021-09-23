@@ -1,0 +1,15 @@
+: 1
+name: libtinycbor
+version: 0.6.0-a.0.z
+project: tinycbor
+summary: Concise Binary Object Representation (CBOR) Library
+license: MIT
+description-file: README
+url: https://github.com/intel/tinycbor/
+doc-url: https://intel.github.io/tinycbor/current/
+src-url: https://github.com/intel/tinycbor/
+package-url: https://github.com/build2-packaging/tinycbor
+package-email: packaging@build2.org ; Mailing list.
+build-error-email: builds@build2.org
+depends: * build2 >= 0.14.0-
+depends: * bpkg >= 0.14.0-
