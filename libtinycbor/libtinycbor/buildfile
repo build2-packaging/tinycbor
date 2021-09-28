@@ -1,38 +1,31 @@
-intf_libs = # Interface dependencies.
-impl_libs = # Implementation dependencies.
-#import xxxx_libs += libhello%lib{hello}
-
-lib{tinycbor}: {h c}{** -version} h{version} $impl_libs $intf_libs
-
-# Include the generated version header into the distribution (so that we don't
-# pick up an installed one) and don't remove it when cleaning in src (so that
-# clean results in a state identical to distributed).
+# open_memstream.c implements open_memstream(), a POSIX function, on systems
+# that are missing an implementation, presumably because they conform to a
+# version older than POSIX.1-2008.
 #
-h{version}: in{version} $src_root/manifest
-{
-  dist  = true
-  clean = ($src_root != $out_root)
-}
-
-h{export}@./: c.importable = false
+lib{tinycbor}: {h c}{* -open_memstream}
 
 # Build options.
 #
-c.poptions =+ "-I$out_root" "-I$src_root"
+if ($c.target.class == 'windows')
+{
+  c.poptions += -DWITHOUT_OPEN_MEMSTREAM
 
-{hbmia obja}{*}: c.poptions += -DLIBTINYCBOR_STATIC_BUILD
-{hbmis objs}{*}: c.poptions += -DLIBTINYCBOR_SHARED_BUILD
+  # CBOR_PRIVATE_API functions are called from inline functions in the public
+  # API so must be exported.
+  #
+  objs{*}: c.poptions += -DCBOR_API='__declspec(dllexport)' \
+                         -DCBOR_PRIVATE_API=CBOR_API
+}
 
 # Export options.
 #
-lib{tinycbor}:
-{
-  c.export.poptions = "-I$out_root" "-I$src_root"
-  c.export.libs = $intf_libs
-}
+lib{tinycbor}: c.export.poptions = "-I$src_root"
 
-liba{tinycbor}: c.export.poptions += -DLIBTINYCBOR_STATIC
-libs{tinycbor}: c.export.poptions += -DLIBTINYCBOR_SHARED
+if ($c.target.class == 'windows')
+{
+  libs{tinycbor}: c.export.poptions += -DCBOR_API='__declspec(dllimport)' \
+                                       -DCBOR_PRIVATE_API=CBOR_API
+}
 
 # For pre-releases use the complete version to make sure they cannot be used
 # in place of another pre-release or the final version. See the version module
@@ -46,7 +39,7 @@ else
 # Install into the libtinycbor/ subdirectory of, say, /usr/include/
 # recreating subdirectories.
 #
-h{*}:
+h{cbor}@./ h{cborjson}@./ h{tinycbor-version}@./:
 {
   install         = include/libtinycbor/
   install.subdirs = true

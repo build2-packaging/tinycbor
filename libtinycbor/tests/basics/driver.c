@@ -1,74 +1,55 @@
-#include <stdio.h>
-#include <errno.h>
-#include <string.h>
+#include <libtinycbor/cbor.h>
 
-#include <libtinycbor/version.h>
-#include <libtinycbor/tinycbor.h>
+// Confirm that MinGW warning about 64-bit printf format is harmless (see
+// README-DEV for details).
+//
+#include <stdio.h>              // sprintf
+#include <stdint.h>             // UINT64_MAX
+#include <inttypes.h>           // PRIu64
 
 #undef NDEBUG
 #include <assert.h>
 
-#ifdef _WIN32
-#define tmpfile mytmpfile
-static FILE *mytmpfile ();
-#endif
-
-int main ()
+int
+main ()
 {
-  char b[256];
-
-  /* Basics.
-   */
+  // Test that an integer can be successfully encoded to and decoded from a
+  // buffer.
+  //
   {
-    FILE *o = tmpfile ();
-    assert (say_hello (o, "World") > 0);
-    rewind (o);
-    assert (fread (b, 1, sizeof (b), o) == 14 &&
-            strncmp (b, "Hello, World!\n", 14) == 0);
-    fclose (o);
+    uint8_t b[16]; // The buffer.
+    int v = 123;   // The integer value.
+
+    // Encode the value.
+    //
+    {
+      CborEncoder e;
+      cbor_encoder_init (&e, b, sizeof (b), 0);
+      cbor_encode_int (&e, v);
+    }
+
+    v = 0;
+
+    // Decode the value.
+    //
+    {
+      CborParser p;
+      CborValue cv;
+      cbor_parser_init (b, sizeof (b), 0, &p, &cv);
+      cbor_value_get_int (&cv, &v);
+    }
+
+    assert (v == 123);
   }
 
-  /* Empty name.
-   */
+  // Test that the printf-like functions correctly convert a long long value
+  // to string on MinGW.
+  //
   {
-    FILE *o = tmpfile ();
-    assert (say_hello (o, "") < 0 && errno == EINVAL);
-    fclose (o);
+    char s[32] = "";
+    sprintf (s, "%" PRIu64, UINT64_MAX);
+    assert (strcmp (s, "18446744073709551615") == 0);
   }
 
   return 0;
 }
-
-#ifdef _WIN32
-#include <windows.h>
-#include <fcntl.h>
-#include <io.h>
-
-FILE *mytmpfile ()
-{
-  char d[MAX_PATH + 1], p[MAX_PATH + 1];
-  if (GetTempPathA (sizeof (d), d) == 0 ||
-      GetTempFileNameA (d, "tmp", 0, p) == 0)
-    return NULL;
-
-  HANDLE h = CreateFileA (p,
-                          GENERIC_READ | GENERIC_WRITE,
-                          0,
-                          NULL,
-                          CREATE_ALWAYS,
-                          FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
-                          NULL);
-  if (h == INVALID_HANDLE_VALUE)
-    return NULL;
-
-  int fd = _open_osfhandle ((intptr_t) h, _O_RDWR);
-  if (fd == -1)
-    return NULL;
-
-  FILE *f = _fdopen (fd, "wb+");
-  if (f == NULL)
-    _close (fd);
-
-  return f;
-}
-#endif
