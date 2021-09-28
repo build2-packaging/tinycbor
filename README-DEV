@@ -1,0 +1,15 @@
+1. Build issues
+
+1.1. Warnings
+
+The `%l` format specifier (for one) is not supported by the MS Visual C/C++
+runtime (MSVCRT) used by MinGW-W64 (on Windows 10 in our case). A number of
+solutions are provided at
+https://sourceforge.net/p/mingw-w64/wiki2/gnu%20printf/ but they require the
+modification of upstream or library user source code.
+
+1.2. Errors
+
+With the MSVC build of clang, cbor.h defines the macro `cbor_static_assert` in
+terms of `static_assert` which is apparently not available on that
+platform. (The LLVM build of Clang works fine on Windows.)
