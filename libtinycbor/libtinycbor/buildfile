@@ -2,7 +2,7 @@
 # that are missing an implementation, presumably because they conform to a
 # version older than POSIX.1-2008.
 #
-lib{tinycbor}: h{*} c{* -open_memstream}
+lib{tinycbor}: {h c}{* -open_memstream}
 
 # Build options.
 #
@@ -18,12 +18,6 @@ if ($c.target.class == 'windows')
 }
 
 # Export options.
-#
-# @@ TMP Upstream expects users to include using prefixless paths such as
-#    <cbor.h>. If there is a way to prevent private headers from being
-#    installed then we could install directly into include/. Otherwise we
-#    could symlink private headers into a separate directory and set install =
-#    false on that directory only.
 #
 lib{tinycbor}: c.export.poptions = "-I$src_root"
 
@@ -45,7 +39,7 @@ else
 # Install into the libtinycbor/ subdirectory of, say, /usr/include/
 # recreating subdirectories.
 #
-h{*}:
+h{cbor cborjson tinycbor-version}@./:
 {
   install         = include/libtinycbor/
   install.subdirs = true

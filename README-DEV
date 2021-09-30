@@ -8,8 +8,18 @@ solutions are provided at
 https://sourceforge.net/p/mingw-w64/wiki2/gnu%20printf/ but they require the
 modification of upstream or library user source code.
 
+@@ Q: how come Qt-bundled cbor doesn't have this issue?
+
 1.2. Errors
 
-With the MSVC build of clang, cbor.h defines the macro `cbor_static_assert` in
-terms of `static_assert` which is apparently not available on that
-platform. (The LLVM build of Clang works fine on Windows.)
+With the MSVC distribution of clang, cbor.h defines the macro
+`cbor_static_assert` in terms of `static_assert` which is apparently not
+available on that platform. (The LLVM distribution of Clang works fine on
+Windows.)
+
+@@ Q: how come Qt-bundled cbor doesn't have this issue?
+
+2. Tests
+
+Upstream tests are still a TODO. Note that they use <QtTest> and will
+therefore have to be placed into a separate *-tests package.
