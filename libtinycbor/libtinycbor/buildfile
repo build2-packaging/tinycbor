@@ -39,7 +39,7 @@ else
 # Install into the libtinycbor/ subdirectory of, say, /usr/include/
 # recreating subdirectories.
 #
-h{cbor cborjson tinycbor-version}@./:
+h{cbor}@./ h{cborjson}@./ h{tinycbor-version}@./:
 {
   install         = include/libtinycbor/
   install.subdirs = true
