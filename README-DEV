@@ -2,13 +2,35 @@
 
 1.1. Warnings
 
-The `%l` format specifier (for one) is not supported by the MS Visual C/C++
-runtime (MSVCRT) used by MinGW-W64 (on Windows 10 in our case). A number of
-solutions are provided at
-https://sourceforge.net/p/mingw-w64/wiki2/gnu%20printf/ but they require the
-modification of upstream or library user source code.
+cbor.h declares a function pointer type called `CborStreamFunction` and tags
+it with `__attribute__((__format__(printf, 2, 3)))`. Under GCC the `printf`
+archetype always refers to the formatting options supported by the system's C
+runtime library which is msvcrt.dll (MSVC C runtime library) in the case of
+MinGW.
 
-@@ Q: how come Qt-bundled cbor doesn't have this issue?
+The function cbor_value_to_pretty_stream() in cbor.h takes an instance of
+CborStreamFunction and, in cborpretty.c, invokes it with the `PRIu64`
+conversion specification which evaluates to something like `%ull`. However,
+because msvcrt.dll does not support the `l` conversion specifier, these calls
+cause GCC to emit warnings like `warning: unknown conversion type character
+'l' in format [-Wformat=]`.
+
+The proper fix would be for cbor.h to use the `gnu_printf` archetype in the
+CborStreamFunction typedef if on Windows and `printf` otherwise. More
+conveniently, the MinGW macro __MINGW_PRINTF_FORMAT automatically evaluates to
+the right archetype. Either way, this can only be fixed upstream.
+
+All indications are, however, that this warning can safely be
+ignored. MinGW-W64 comes with its own C runtime library, mingw-w64-crt (built
+on top of msvcrt.dll) whose printf-family functions do accept `%l` (and are
+tagged with the `gnu_printf` archetype). Presumably tinycbor users are
+unlikely to pass functions that do not support `%l`.
+
+References:
+
+  https://gcc.gnu.org/bugzilla/show_bug.cgi?id=37768
+  https://bugzilla.mozilla.org/show_bug.cgi?id=1331349
+  https://sourceforge.net/p/mingw-w64/wiki2/gnu%20printf/
 
 1.2. Errors
 
@@ -16,8 +38,6 @@ With the MSVC distribution of clang, cbor.h defines the macro
 `cbor_static_assert` in terms of `static_assert` which is apparently not
 available on that platform. (The LLVM distribution of Clang works fine on
 Windows.)
-
-@@ Q: how come Qt-bundled cbor doesn't have this issue?
 
 2. Tests
 
