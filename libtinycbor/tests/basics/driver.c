@@ -4,6 +4,7 @@
 // README-DEV for details).
 //
 #include <stdio.h>              // sprintf
+#include <stdint.h>             // UINT64_MAX
 #include <inttypes.h>           // PRIu64
 
 #undef NDEBUG
@@ -46,7 +47,7 @@ main ()
   //
   {
     char s[32] = "";
-    sprintf (s, "%" PRIu64, 18446744073709551615ULL);
+    sprintf (s, "%" PRIu64, UINT64_MAX);
     assert (strcmp (s, "18446744073709551615") == 0);
   }
 
