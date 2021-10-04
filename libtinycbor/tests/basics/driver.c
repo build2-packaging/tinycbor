@@ -1,12 +1,13 @@
-// Silence "sprintf is unsafe" warnings on Windows.
+#include <libtinycbor/cbor.h>
+
+// Confirm that MinGW warning about 64-bit printf format is harmless (see
+// README-DEV for details).
 //
-#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>              // sprintf
-#undef NDEBUG
-#include <assert.h>
 #include <inttypes.h>           // PRIu64
 
-#include <libtinycbor/cbor.h>
+#undef NDEBUG
+#include <assert.h>
 
 int
 main ()
@@ -40,8 +41,8 @@ main ()
     assert (v == 123);
   }
 
-  // Test that the printf-like functions correctly convert a long value to
-  // string (see README-DEV for details).
+  // Test that the printf-like functions correctly convert a long long value
+  // to string on MinGW.
   //
   {
     char s[32] = "";
