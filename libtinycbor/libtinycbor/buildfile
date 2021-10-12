@@ -32,13 +32,14 @@ if ($c.target.class == 'windows')
 # for details on the version.* variable values.
 #
 if $version.pre_release
-  lib{tinycbor}: bin.lib.version = @"-$version.project_id"
+  lib{tinycbor}: bin.lib.version = "-$version.project_id"
 else
-  lib{tinycbor}: bin.lib.version = @"-$version.major.$version.minor"
+  lib{tinycbor}: bin.lib.version = "-$version.major.$version.minor"
 
 # Install into the libtinycbor/ subdirectory of, say, /usr/include/
 # recreating subdirectories.
 #
+h{*}: install = false
 h{cbor}@./ h{cborjson}@./ h{tinycbor-version}@./:
 {
   install         = include/libtinycbor/
