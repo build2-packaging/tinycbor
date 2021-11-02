@@ -1,6 +1,6 @@
 : 1
 name: libtinycbor
-version: 0.6.0-a.0.z
+version: 0.6.0
 project: tinycbor
 summary: Concise Binary Object Representation (CBOR) library
 license: MIT
